@@ -3,9 +3,10 @@ using MailKit.Security;
 using MimeKit;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using HostelManage.Application.Interfaces;
 namespace HostelManage.Application.Services
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
         private readonly IConfiguration _configuration;
 

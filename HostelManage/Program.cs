@@ -6,7 +6,7 @@ using HostelManage.Application.Services;
 using HostelManage.Application.Interfaces;
 using HostelManage.Repositories.Interfaces;
 using HostelManage.Repositories.Implementations;
-
+using HostelManage.Application.Mappings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +35,22 @@ builder.Services.AddHttpClient<IPaymentService, PaymentService>();
 
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+builder.Services.AddScoped<IHostelService, HostelService>();
+
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IHostelDescriptionService, HostelDescriptionService>();
+
+builder.Services.AddScoped<IHostelRoomService,  HostelRoomService>();
+
 // Configure CORS policy for handling different origins
 builder.Services.AddCors(options =>
 {
