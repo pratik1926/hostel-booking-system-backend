@@ -2,8 +2,8 @@
 using HostelManage.Data;
 using Microsoft.EntityFrameworkCore;
 using HostelManage.Application.Interfaces;
-using HostelManage.Application.DTOs;
 using AutoMapper;
+using HostelManage.Application.DTOs.Booking;
 
 namespace HostelManage.Application.Services
 {
@@ -186,6 +186,32 @@ namespace HostelManage.Application.Services
             await _emailService.SendEmailAsync(hostelOwner.Email, "New Booking", ownerMessage);
 
             return "Booking approved and emails sent.";
+        }
+
+        public async Task MarkBookingAsPaid(int bookingId)
+        {
+            var booking = await _context.Booking.FindAsync(bookingId);
+
+            if (booking == null || booking.Status == 1)
+                return;
+
+            booking.Status = 1;
+
+            var hostel = await _context.Hostel.FindAsync(booking.HostelID);
+
+            if (hostel != null)
+            {
+                if (booking.RoomType == hostel.RoomType1 && hostel.RoomType1Count > 0)
+                    hostel.RoomType1Count--;
+
+                else if (booking.RoomType == hostel.RoomType2 && hostel.RoomType2Count > 0)
+                    hostel.RoomType2Count--;
+
+                else if (booking.RoomType == hostel.RoomType3 && hostel.RoomType3Count > 0)
+                    hostel.RoomType3Count--;
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

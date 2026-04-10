@@ -51,6 +51,10 @@ builder.Services.AddScoped<IHostelDescriptionService, HostelDescriptionService>(
 
 builder.Services.AddScoped<IHostelRoomService,  HostelRoomService>();
 
+builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<IVerificationService, VerificationService>();
+
 // Configure CORS policy for handling different origins
 builder.Services.AddCors(options =>
 {

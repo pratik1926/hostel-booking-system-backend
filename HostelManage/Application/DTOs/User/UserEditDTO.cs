@@ -1,4 +1,4 @@
-﻿namespace HostelManage.Application.DTOs
+﻿namespace HostelManage.Application.DTOs.User
 {
     public class UserEditDTO
     {

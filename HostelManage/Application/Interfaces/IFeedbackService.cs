@@ -1,5 +1,5 @@
 ﻿using HostelManage.Models;
-using HostelManage.Application.DTOs;
+using HostelManage.Application.DTOs.Feedback;
 
 
 namespace HostelManage.Application.Interfaces

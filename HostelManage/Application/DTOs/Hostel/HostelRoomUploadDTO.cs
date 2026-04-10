@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace HostelManage.Application.DTOs
+namespace HostelManage.Application.DTOs.Hostel
 {
     public class HostelRoomUploadDTO
     {

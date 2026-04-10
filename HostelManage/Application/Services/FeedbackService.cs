@@ -1,8 +1,8 @@
 ﻿using HostelManage.Data;
 using HostelManage.Models;
-using HostelManage.Application.DTOs;
 using HostelManage.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using HostelManage.Application.DTOs.Feedback;
 
 namespace HostelManage.Application.Services
 {

@@ -1,7 +1,7 @@
 ﻿
 using AutoMapper;
 using HostelManage.Models;
-using HostelManage.Application.DTOs;
+using HostelManage.Application.DTOs.Booking;
 
 
 namespace HostelManage.Application.Mappings

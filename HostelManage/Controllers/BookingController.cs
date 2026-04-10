@@ -534,7 +534,7 @@ using HostelManage.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using HostelManage.Application.DTOs;
+using HostelManage.Application.DTOs.Booking;
 
 namespace HostelManage.Controllers
 {

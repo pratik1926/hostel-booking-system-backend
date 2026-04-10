@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
-namespace HostelManage.Application.DTOs
+namespace HostelManage.Application.DTOs.User
 {
     public class UserCreateDTO
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HostelManage.Application.DTOs
+namespace HostelManage.Application.DTOs.Hostel
 {
     public class LoginDTO
     {

@@ -105,12 +105,116 @@
 
 
 
-using Microsoft.EntityFrameworkCore;
+
+//using Newtonsoft.Json;
+//using System.Net.Http;
+//using System.Text;
+//using System.Threading.Tasks;
+//using HostelManage.Data;
+//using HostelManage.Application.Interfaces;
+
+//namespace HostelManage.Application.Services
+//{
+//    public class PaymentService : IPaymentService
+//    {
+//        private readonly HttpClient _httpClient;
+//        private readonly AppDbContext _context;
+
+//        private const string SECRET_KEY = "2829e52e041b435fb9393e592882385d";
+
+//        public PaymentService(HttpClient httpClient, AppDbContext context)
+//        {
+//            _httpClient = httpClient;
+//            _context = context;
+//        }
+
+//        public async Task<string> InitiatePaymentAsync(decimal amount, string orderId, string orderName)
+//        {
+//            var payload = new
+//            {
+//                return_url = "http://localhost:3000/payment-success",
+//                website_url = "http://localhost:3000",
+//                amount,
+//                purchase_order_id = orderId,
+//                purchase_order_name = orderName
+//            };
+
+//            var json = JsonConvert.SerializeObject(payload);
+
+//            var request = new HttpRequestMessage(HttpMethod.Post, "https://a.khalti.com/api/v2/epayment/initiate/")
+//            {
+//                Content = new StringContent(json, Encoding.UTF8, "application/json")
+//            };
+
+//            request.Headers.Add("Authorization", $"Key {SECRET_KEY}");
+
+//            var response = await _httpClient.SendAsync(request);
+//            var responseContent = await response.Content.ReadAsStringAsync();
+
+//            dynamic result = JsonConvert.DeserializeObject(responseContent);
+
+//            return result?.payment_url;
+//        }
+
+//        public async Task<bool> VerifyPaymentAsync(string pidx)
+//        {
+//            var payload = new { pidx };
+
+//            var json = JsonConvert.SerializeObject(payload);
+
+//            var request = new HttpRequestMessage(HttpMethod.Post, "https://a.khalti.com/api/v2/epayment/lookup/")
+//            {
+//                Content = new StringContent(json, Encoding.UTF8, "application/json")
+//            };
+
+//            request.Headers.Add("Authorization", $"Key {SECRET_KEY}");
+
+//            var response = await _httpClient.SendAsync(request);
+//            var responseContent = await response.Content.ReadAsStringAsync();
+
+//            dynamic result = JsonConvert.DeserializeObject(responseContent);
+
+//            return result?.status == "Completed";
+//        }
+
+//        public async Task MarkBookingAsPaid(int bookingId)
+//        {
+//            // ✅ FIXED DbSet name
+//            var booking = await _context.Booking.FindAsync(bookingId);
+
+//            // ✅ FIXED: Status is int (1 = Paid)
+//            if (booking == null || booking.Status == 1)
+//                return;
+
+//            // ✅ mark as paid
+//            booking.Status = 1;
+
+//            // ✅ FIXED HostelID name
+//            var hostel = await _context.Hostel.FindAsync(booking.HostelID);
+
+//            if (hostel != null)
+//            {
+//                if (booking.RoomType == hostel.RoomType1 && hostel.RoomType1Count > 0)
+//                    hostel.RoomType1Count--;
+
+//                else if (booking.RoomType == hostel.RoomType2 && hostel.RoomType2Count > 0)
+//                    hostel.RoomType2Count--;
+
+//                else if (booking.RoomType == hostel.RoomType3 && hostel.RoomType3Count > 0)
+//                    hostel.RoomType3Count--;
+//            }
+
+//            await _context.SaveChangesAsync();
+//        }
+//    }
+//}
+
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using HostelManage.Data;
+using HostelManage.Application.Interfaces;
 
 namespace HostelManage.Application.Services
 {
@@ -127,8 +231,58 @@ namespace HostelManage.Application.Services
             _context = context;
         }
 
-        public async Task<string> InitiatePaymentAsync(decimal amount, string orderId, string orderName)
+        //public async Task<string> InitiatePaymentAsync(int bookingId)
+        //{
+        //    var booking = await _context.Booking.FindAsync(bookingId);
+
+        //    if (booking == null)
+        //        throw new Exception("Booking not found");
+
+        //    var amount = 10000; // update later if needed
+        //    var orderId = $"BOOKING_{booking.Id}";
+        //    var orderName = booking.HostelName;
+
+        //    var payload = new
+        //    {
+        //        return_url = "http://localhost:3000/payment-success",
+        //        website_url = "http://localhost:3000",
+        //        amount,
+        //        purchase_order_id = orderId,
+        //        purchase_order_name = orderName
+        //    };
+
+        //    var json = JsonConvert.SerializeObject(payload);
+
+        //    var request = new HttpRequestMessage(HttpMethod.Post, "https://a.khalti.com/api/v2/epayment/initiate/")
+        //    {
+        //        Content = new StringContent(json, Encoding.UTF8, "application/json")
+        //    };
+
+        //    request.Headers.Add("Authorization", $"Key {SECRET_KEY}");
+
+        //    var response = await _httpClient.SendAsync(request);
+        //    var responseContent = await response.Content.ReadAsStringAsync();
+
+        //    dynamic result = JsonConvert.DeserializeObject(responseContent);
+
+        //    return result?.payment_url;
+        //}
+
+        public async Task<string> InitiatePaymentAsync(int bookingId)
         {
+            var booking = await _context.Booking.FindAsync(bookingId);
+
+            if (booking == null)
+                throw new Exception("Booking not found");
+
+            var amount = 10000;
+
+            var orderId = $"BOOKING_{booking.BookingID}";
+
+            // ✅ FIX HERE
+            var hostel = await _context.Hostel.FindAsync(booking.HostelID);
+            var orderName = hostel?.HostelName ?? "Hostel Booking";
+
             var payload = new
             {
                 return_url = "http://localhost:3000/payment-success",
@@ -174,36 +328,6 @@ namespace HostelManage.Application.Services
             dynamic result = JsonConvert.DeserializeObject(responseContent);
 
             return result?.status == "Completed";
-        }
-
-        public async Task MarkBookingAsPaid(int bookingId)
-        {
-            // ✅ FIXED DbSet name
-            var booking = await _context.Booking.FindAsync(bookingId);
-
-            // ✅ FIXED: Status is int (1 = Paid)
-            if (booking == null || booking.Status == 1)
-                return;
-
-            // ✅ mark as paid
-            booking.Status = 1;
-
-            // ✅ FIXED HostelID name
-            var hostel = await _context.Hostel.FindAsync(booking.HostelID);
-
-            if (hostel != null)
-            {
-                if (booking.RoomType == hostel.RoomType1 && hostel.RoomType1Count > 0)
-                    hostel.RoomType1Count--;
-
-                else if (booking.RoomType == hostel.RoomType2 && hostel.RoomType2Count > 0)
-                    hostel.RoomType2Count--;
-
-                else if (booking.RoomType == hostel.RoomType3 && hostel.RoomType3Count > 0)
-                    hostel.RoomType3Count--;
-            }
-
-            await _context.SaveChangesAsync();
         }
     }
 }

@@ -126,8 +126,8 @@
 
 using Microsoft.AspNetCore.Mvc;
 using HostelManage.Application.Interfaces;
-using HostelManage.Application.DTOs;
 using HostelManage.Application.Services;
+using HostelManage.Application.DTOs.Hostel;
 
 namespace HostelManage.Controllers.Api
 {

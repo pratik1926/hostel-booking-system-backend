@@ -1,4 +1,4 @@
-﻿using HostelManage.Application.DTOs;
+﻿using HostelManage.Application.DTOs.Hostel;
 
 namespace HostelManage.Application.Interfaces
 {

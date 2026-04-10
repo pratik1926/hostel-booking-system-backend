@@ -1,9 +1,9 @@
 ﻿using HostelManage.Data;
 using HostelManage.Models;
-using HostelManage.Application.DTOs;
 using HostelManage.Application.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using HostelManage.Application.DTOs.Hostel;
 
 namespace HostelManage.Application.Services
 {

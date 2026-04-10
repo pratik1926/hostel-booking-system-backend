@@ -105,10 +105,136 @@
 //    }
 //}
 
+//using Microsoft.AspNetCore.Mvc;
+//using System.Threading.Tasks;
+//using System;
+//using HostelManage.Application.Services;
+
+//namespace HostelManage.Controllers
+//{
+//    [ApiController]
+//    [Route("api/payment")]
+//    public class PaymentController : ControllerBase
+//    {
+//        private readonly IPaymentService _paymentService;
+
+//        public PaymentController(IPaymentService paymentService)
+//        {
+//            _paymentService = paymentService;
+//        }
+
+//        [HttpPost("initiate")]
+//        public async Task<IActionResult> InitiatePayment([FromBody] PaymentRequestModel request)
+//        {
+//            if (request == null || request.Amount <= 0 || string.IsNullOrEmpty(request.OrderId))
+//            {
+//                return BadRequest(new { message = "Invalid payment request" });
+//            }
+
+//            try
+//            {
+//                var paymentUrl = await _paymentService.InitiatePaymentAsync(
+//                    request.Amount,
+//                    request.OrderId,
+//                    request.OrderName
+//                );
+
+//                if (string.IsNullOrEmpty(paymentUrl))
+//                {
+//                    return BadRequest(new { message = "Failed to initiate payment" });
+//                }
+
+//                return Ok(new { paymentUrl });
+//            }
+//            catch (Exception ex)
+//            {
+//                return StatusCode(500, new
+//                {
+//                    message = "Error initiating payment",
+//                    error = ex.Message
+//                });
+//            }
+//        }
+
+//        //[HttpPost("verify-payment")]
+//        //public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentRequest request)
+//        //{
+//        //    if (request == null || string.IsNullOrEmpty(request.Pidx))
+//        //    {
+//        //        return BadRequest(new { message = "Invalid verification request" });
+//        //    }
+
+//        //    bool isVerified = await _paymentService.VerifyPaymentAsync(request.Pidx);
+
+//        //    if (!isVerified)
+//        //    {
+//        //        return BadRequest(new { message = "Payment verification failed" });
+//        //    }
+
+//        //    return Ok(new { message = "Payment verified successfully" });
+//        //}
+
+//        //[HttpPost("verify-payment")]
+//        //public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentRequest request)
+//        //{
+//        //    if (request == null || string.IsNullOrEmpty(request.Pidx))
+//        //    {
+//        //        return BadRequest(new { message = "Invalid request" });
+//        //    }
+
+//        //    bool isVerified = await _paymentService.VerifyPaymentAsync(request.Pidx);
+
+//        //    if (!isVerified)
+//        //    {
+//        //        return BadRequest(new { message = "Payment verification failed" });
+//        //    }
+
+//        //    return Ok(new { message = "Payment verified successfully" });
+//        //}
+
+//        [HttpPost("verify-payment")]
+//        public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentRequest request)
+//        {
+//            if (request == null || string.IsNullOrEmpty(request.Pidx))
+//            {
+//                return BadRequest(new { message = "Invalid request" });
+//            }
+
+//            bool isVerified = await _paymentService.VerifyPaymentAsync(request.Pidx);
+
+//            if (!isVerified)
+//            {
+//                return BadRequest(new { message = "Payment verification failed" });
+//            }
+
+//            // 🔥 NEW: update booking + room
+//            await _paymentService.MarkBookingAsPaid(request.BookingId);
+
+//            return Ok(new { message = "Payment verified & booking updated" });
+//        }
+
+//        public class VerifyPaymentRequest
+//        {
+//            public string Pidx { get; set; }
+
+//            public int BookingId { get; set; }
+
+//        }
+//    }
+
+//    public class PaymentRequestModel
+//    {
+//        public decimal Amount { get; set; }
+//        public string OrderId { get; set; }
+//        public string OrderName { get; set; }
+//    }
+//}
+
+
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using System;
-using HostelManage.Application.Services;
+using HostelManage.Application.Interfaces;
+using HostelManage.Application.DTOs.Payment;
 
 namespace HostelManage.Controllers
 {
@@ -117,115 +243,58 @@ namespace HostelManage.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
+        private readonly IBookingService _bookingService;
 
-        public PaymentController(IPaymentService paymentService)
+        public PaymentController(IPaymentService paymentService, IBookingService bookingService)
         {
             _paymentService = paymentService;
+            _bookingService = bookingService;
         }
 
+        // 🔹 Initiate Payment
         [HttpPost("initiate")]
-        public async Task<IActionResult> InitiatePayment([FromBody] PaymentRequestModel request)
+        public async Task<IActionResult> InitiatePayment([FromBody] InitiatePaymentDTO request)
         {
-            if (request == null || request.Amount <= 0 || string.IsNullOrEmpty(request.OrderId))
-            {
-                return BadRequest(new { message = "Invalid payment request" });
-            }
+            if (request == null || request.BookingId <= 0)
+                return BadRequest(new { message = "Invalid bookingId" });
 
             try
             {
-                var paymentUrl = await _paymentService.InitiatePaymentAsync(
-                    request.Amount,
-                    request.OrderId,
-                    request.OrderName
-                );
+                var paymentUrl = await _paymentService.InitiatePaymentAsync(request.BookingId);
 
                 if (string.IsNullOrEmpty(paymentUrl))
-                {
                     return BadRequest(new { message = "Failed to initiate payment" });
-                }
 
                 return Ok(new { paymentUrl });
             }
-            catch (Exception ex)
+            catch
             {
-                return StatusCode(500, new
-                {
-                    message = "Error initiating payment",
-                    error = ex.Message
-                });
+                return StatusCode(500, new { message = "Error initiating payment" });
             }
         }
 
-        //[HttpPost("verify-payment")]
-        //public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentRequest request)
-        //{
-        //    if (request == null || string.IsNullOrEmpty(request.Pidx))
-        //    {
-        //        return BadRequest(new { message = "Invalid verification request" });
-        //    }
-
-        //    bool isVerified = await _paymentService.VerifyPaymentAsync(request.Pidx);
-
-        //    if (!isVerified)
-        //    {
-        //        return BadRequest(new { message = "Payment verification failed" });
-        //    }
-
-        //    return Ok(new { message = "Payment verified successfully" });
-        //}
-
-        //[HttpPost("verify-payment")]
-        //public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentRequest request)
-        //{
-        //    if (request == null || string.IsNullOrEmpty(request.Pidx))
-        //    {
-        //        return BadRequest(new { message = "Invalid request" });
-        //    }
-
-        //    bool isVerified = await _paymentService.VerifyPaymentAsync(request.Pidx);
-
-        //    if (!isVerified)
-        //    {
-        //        return BadRequest(new { message = "Payment verification failed" });
-        //    }
-
-        //    return Ok(new { message = "Payment verified successfully" });
-        //}
-
+        // 🔹 Verify Payment
         [HttpPost("verify-payment")]
-        public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentRequest request)
+        public async Task<IActionResult> VerifyPayment([FromBody] VerifyPaymentDTO request)
         {
-            if (request == null || string.IsNullOrEmpty(request.Pidx))
-            {
+            if (request == null || string.IsNullOrEmpty(request.Pidx) || request.BookingId <= 0)
                 return BadRequest(new { message = "Invalid request" });
-            }
 
-            bool isVerified = await _paymentService.VerifyPaymentAsync(request.Pidx);
-
-            if (!isVerified)
+            try
             {
-                return BadRequest(new { message = "Payment verification failed" });
+                var isVerified = await _paymentService.VerifyPaymentAsync(request.Pidx);
+
+                if (!isVerified)
+                    return BadRequest(new { message = "Payment verification failed" });
+
+                await _bookingService.MarkBookingAsPaid(request.BookingId);
+
+                return Ok(new { message = "Payment verified & booking updated" });
             }
-
-            // 🔥 NEW: update booking + room
-            await _paymentService.MarkBookingAsPaid(request.BookingId);
-
-            return Ok(new { message = "Payment verified & booking updated" });
+            catch
+            {
+                return StatusCode(500, new { message = "Error verifying payment" });
+            }
         }
-
-        public class VerifyPaymentRequest
-        {
-            public string Pidx { get; set; }
-
-            public int BookingId { get; set; }
-
-        }
-    }
-
-    public class PaymentRequestModel
-    {
-        public decimal Amount { get; set; }
-        public string OrderId { get; set; }
-        public string OrderName { get; set; }
     }
 }

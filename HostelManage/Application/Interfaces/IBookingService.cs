@@ -1,5 +1,5 @@
 ﻿using HostelManage.Models;
-using HostelManage.Application.DTOs;
+using HostelManage.Application.DTOs.Booking;
 public interface IBookingService
 {
     Task<int> GetBookingCount();
@@ -12,6 +12,7 @@ public interface IBookingService
     Task<IEnumerable<Booking>> GetAllBookings();
     Task<object> GetMyProfile(int userId);
     Task<string> BookRoom(int bookingId);
+    Task MarkBookingAsPaid(int bookingId);
     
 
 }
